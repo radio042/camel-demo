@@ -35,16 +35,6 @@
           <groupId>org.jboss.slf4j</groupId>
           <artifactId>slf4j-jboss-logmanager</artifactId>
       </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.jboss.logmanager</groupId>-->
-<!--      <artifactId>log4j2-jboss-logmanager</artifactId>-->
-<!--    </dependency>-->
-<!--    <dependency>-->
-<!--      <groupId>org.slf4j</groupId>-->
-<!--      <artifactId>slf4j-log4j12</artifactId>-->
-<!--      <version>1.7.30</version>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-test-junit5</artifactId>
