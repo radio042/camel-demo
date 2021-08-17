@@ -1,4 +1,4 @@
-package org.coolinc.marketing;
+package org.acme.marketing;
 
 import org.apache.camel.builder.RouteBuilder;
 
