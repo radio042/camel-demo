@@ -6,16 +6,16 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
-public class MarketingCommunicationsRouteTest extends CamelTestSupport {
+public class SimpleRouteTest extends CamelTestSupport {
 
     @Test
     public void messagesForMarketingChannelsAreSent() throws Exception {
         // given
-        AdviceWith.adviceWith(context, "marketing-route", a -> {
+        AdviceWith.adviceWith(context, "simple-route", a -> {
             a.replaceFromWith("direct:start");
-            a.interceptSendToEndpoint("kafka:social-media-topic?brokers=localhost:29092")
+            a.interceptSendToEndpoint("kafka:twitter-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:topic-1");
-            a.interceptSendToEndpoint("kafka:local-papers-topic?brokers=localhost:29092")
+            a.interceptSendToEndpoint("kafka:facebook-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:topic-2");
             a.interceptSendToEndpoint("kafka:error-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:error-topic");
@@ -47,11 +47,11 @@ public class MarketingCommunicationsRouteTest extends CamelTestSupport {
     @Test
     public void messagesForOtherChannelsAreFilteredOut() throws Exception {
         // given
-        AdviceWith.adviceWith(context, "marketing-route", a -> {
+        AdviceWith.adviceWith(context, "simple-route", a -> {
             a.replaceFromWith("direct:start");
-            a.interceptSendToEndpoint("kafka:social-media-topic?brokers=localhost:29092")
+            a.interceptSendToEndpoint("kafka:twitter-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:topic-1");
-            a.interceptSendToEndpoint("kafka:local-papers-topic?brokers=localhost:29092")
+            a.interceptSendToEndpoint("kafka:facebook-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:topic-2");
             a.interceptSendToEndpoint("kafka:error-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:error-topic");
@@ -82,11 +82,11 @@ public class MarketingCommunicationsRouteTest extends CamelTestSupport {
     @Test
     public void invalidMessagesAreSentToErrorTopic() throws Exception {
         // given
-        AdviceWith.adviceWith(context, "marketing-route", a -> {
+        AdviceWith.adviceWith(context, "simple-route", a -> {
             a.replaceFromWith("direct:start");
-            a.interceptSendToEndpoint("kafka:social-media-topic?brokers=localhost:29092")
+            a.interceptSendToEndpoint("kafka:twitter-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:topic-1");
-            a.interceptSendToEndpoint("kafka:local-papers-topic?brokers=localhost:29092")
+            a.interceptSendToEndpoint("kafka:facebook-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:topic-2");
             a.interceptSendToEndpoint("kafka:error-topic?brokers=localhost:29092")
                     .skipSendToOriginalEndpoint().to("mock:error-topic");
@@ -112,7 +112,7 @@ public class MarketingCommunicationsRouteTest extends CamelTestSupport {
 
     @Override
     protected RouteBuilder createRouteBuilder() {
-        return new MarketingCommunicationsRoute();
+        return new SimpleRoute();
     }
 
 }
