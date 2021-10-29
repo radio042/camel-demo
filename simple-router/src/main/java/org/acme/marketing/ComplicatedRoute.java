@@ -36,7 +36,7 @@ public class ComplicatedRoute extends RouteBuilder {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            return enrichmentExchange;
+            return originalExchange;
         };
     }
 }
