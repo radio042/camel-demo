@@ -14,16 +14,13 @@ public class ComplicatedRoute2 extends RouteBuilder {
 
     @Override
     public void configure() {
+        getContext().setTracing(true);
         from("kafka:in?brokers=localhost:29092")
                 .routeId("complicated-route-2")
-                .errorHandler(deadLetterChannel("kafka:errors?brokers=localhost:29092"))
-                .log("########### 1")
-                .filter(jsonpath("$.[?(@.bringFriends == true)]"))
-                .log("########### 2")
+                .filter().jsonpath("$.[?(@.bringFriends == true)]")
                 .pollEnrich()
                 .simple("file:classes?noop=true&idempotent=false&fileName=snacks.txt")
-//                .aggregationStrategy(this::contentAsHeader)
-                .log("########### 3")
+                .aggregationStrategy(this::contentAsHeader)
                 .split(header("snacks").tokenize(","))
                 .process(this::messageToFriends)
                 .to("kafka:out?brokers=localhost:29092");

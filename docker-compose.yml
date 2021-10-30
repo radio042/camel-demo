@@ -30,9 +30,7 @@ services:
     depends_on:
       - kafka
     command: "bash -c 'cub kafka-ready -b kafka:9092 1 20 && \
-                       kafka-topics --zookeeper zookeeper:2181 --create --topic marketing-topic --partitions 1 --replication-factor 1 && \
-                       kafka-topics --zookeeper zookeeper:2181 --create --topic error-topic --partitions 1 --replication-factor 1 && \
-                       kafka-topics --zookeeper zookeeper:2181 --create --topic facebook-topic --partitions 1 --replication-factor 1 && \
-                       kafka-topics --zookeeper zookeeper:2181 --create --topic twitter-topic --partitions 1 --replication-factor 1 && \
-                       kafka-topics --zookeeper zookeeper:2181 --create --topic instagram-topic --partitions 1 --replication-factor 1 && \
+                       kafka-topics --zookeeper zookeeper:2181 --create --topic in --partitions 1 --replication-factor 1 && \
+                       kafka-topics --zookeeper zookeeper:2181 --create --topic errors --partitions 1 --replication-factor 1 && \
+                       kafka-topics --zookeeper zookeeper:2181 --create --topic out --partitions 1 --replication-factor 1 && \
                        sleep infinity'"
