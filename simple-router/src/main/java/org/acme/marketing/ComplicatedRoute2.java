@@ -20,10 +20,17 @@ public class ComplicatedRoute2 extends RouteBuilder {
                 .filter().jsonpath("$.[?(@.bringFriends == true)]")
                 .pollEnrich()
                 .simple("file:classes?noop=true&idempotent=false&fileName=snacks.txt")
-                .aggregationStrategy(this::contentAsHeader)
-                .split(header("snacks").tokenize(","))
+                .aggregationStrategy(this::contentAsBody)
+                .split(header("snacks").tokenize(",")).aggregationStrategy((oldExchange, newExchange) -> newExchange)
+//                .loop(header("snacks").tokenize(","))
+//                .dynamicRouter().method(ComplicatedRoute2.class, "blupp")
                 .process(this::messageToFriends)
                 .to("kafka:out?brokers=localhost:29092");
+    }
+
+    private Exchange contentAsBody(Exchange originalExchange, Exchange enrichmentExchange) {
+        // todo
+        return originalExchange;
     }
 
     private Exchange contentAsHeader(Exchange originalExchange, Exchange enrichmentExchange) {
