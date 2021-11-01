@@ -11,10 +11,5 @@ docker exec camel-demo_kafka_1 kafka-console-consumer --topic frank --bootstrap-
 
 {"message": "Party at my place this Saturday", "bringFriends": true, "bringSnacks": true}
 
-simple:
-invite friends -> "dear friend, you are invited to a gaming party"
-complicated, template as resource:
-invite friends -> ["dear Bob, you are invited...", "dear Charlie, you are invited..."]
-
-more complicated, bring stuff?:
-invite friends, buy stuff -> ["dear Bob, you are invited... Bring pizza", "dear Charlie, you are invited... Bring salad"]
+- body to header, split, aggregate to 3 messages, header to body
+- split in method, build 3 exchanges
