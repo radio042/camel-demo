@@ -1,7 +1,7 @@
 Snippets
 
-We were often struggled with finding good implementation examples that actually work.
-Camel provides a lot of different ways on how to do things, but the official documentation does not always give guildelines which way to choose.
+We were often struggling with finding good implementation examples that actually work.
+Camel provides a lot of different ways to do things, but the official documentation does not always give guildelines which way to choose.
 This articles series addresses the gap with opinions and code examples.
 Basically, these are the things that would have helped us immensely as we adopted Camel.
 

@@ -11,5 +11,6 @@ docker exec camel-demo_kafka_1 kafka-console-consumer --topic frank --bootstrap-
 
 {"message": "Party at my place this Saturday", "bringFriends": true, "bringSnacks": true}
 
-- body to header, split, aggregate to 3 messages, header to body
-- split in method, build 3 exchanges
+- body to header, split, aggregate to 3 messages, header to body -> aggregation complicated
+- split in method, build 3 exchanges - java intensive
+- process and send sequentially
