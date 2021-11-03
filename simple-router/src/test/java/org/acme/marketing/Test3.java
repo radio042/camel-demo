@@ -1,5 +1,6 @@
 package org.acme.marketing;
 
+import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.AdviceWith;
@@ -62,28 +63,81 @@ public class Test3 extends CamelTestSupport {
             public void configure() {
                 getContext().setTracing(true);
 
-                // body to header, split, aggregate to 3 messages, header to body
-//                from("direct:in")
-//                        .routeId("complicated-route-4")
-//                        .filter().jsonpath("$.[?(@.bringFriends == true)]")
-//                        .pollEnrich()
-//                        .simple("file:deleteme?noop=true&idempotent=false&fileName=snacks.txt")
-//                        .aggregationStrategy(this::contentAsBody)
-//                        .process(exchange -> System.out.println("body: " + exchange.getMessage().getBody(String.class)))
-//                        .split().tokenize(",")
-//                        .process(exchange -> System.out.println("split body: " + exchange.getMessage().getBody(String.class)))
-//                        .to("mock:out");
+                // body to header, split, aggregate to 3 messages, header to body, open: aggregator
+//                splitSolution();
+
+                // loadbalancer, problems: completion, message when no snacks
+//                balanceLoaderSolution();
 
                 // split in method, build 3 exchanges - java intensive, todo
-                // process and send sequentially
+                // process and send sequentially todo
+
+
+            }
+
+            private void splitSolution() {
                 from("direct:in")
                         .routeId("complicated-route-4")
                         .filter().jsonpath("$.[?(@.bringFriends == true)]")
                         .pollEnrich()
                         .simple("file:deleteme?noop=true&idempotent=false&fileName=snacks.txt")
-                        .aggregationStrategy(this::contentAsHeader2)
+                        .aggregationStrategy(this::contentAsBody)
+                        .process(exchange -> System.out.println("body: " + exchange.getMessage().getBody(String.class)))
+                        .split().tokenize(",")
                         .process(exchange -> System.out.println("split body: " + exchange.getMessage().getBody(String.class)))
                         .to("mock:out");
+            }
+
+            private void balanceLoaderSolution() {
+                from("direct:in")
+                        .routeId("complicated-route-4")
+                        .filter().jsonpath("$.[?(@.bringFriends == true)]")
+                        .pollEnrich()
+                        .simple("file:deleteme?noop=true&idempotent=false&fileName=snacks.txt")
+                        .aggregationStrategy(this::contentAsBody)
+                        .split().tokenize(",")
+                        .process(exchange -> System.out.println("split body: " + exchange.getMessage().getBody(String.class)))
+                        .loadBalance().roundRobin()
+                        .to("direct:a")
+                        .to("direct:b")
+                        .to("direct:c")
+                        .end()
+                        .to("mock:out");
+                from("direct:a")
+                        .aggregate(header("original-exchange-body"), this::mergeBodies)
+                        .completionSize(1)
+//                        .completionTimeout(500)
+//                        .completionSize(10).completionInterval(5000)
+//                        .completionSize(2).completionTimeout(500)
+                        .log("a body: ${body}")
+                        .to("mock:a");
+                from("direct:b")
+                        .aggregate(header("original-exchange-body"), this::mergeBodies)
+                        .completionSize(1)
+//                        .completionTimeout(500)
+//                        .completionSize(10).completionInterval(5000)
+//                        .completionSize(2).completionTimeout(500)
+                        .log("b body: ${body}")
+                        .to("mock:b");
+                from("direct:c")
+                        .aggregate(header("original-exchange-body"), this::mergeBodies)
+                        .completionSize(1)
+//                        .completionTimeout(500)
+//                        .completionSize(10).completionInterval(5000)
+//                        .completionSize(1).completionTimeout(500)
+                        .log("c body: ${body}")
+                        .to("mock:c");
+            }
+
+            private Exchange mergeBodies(Exchange firstExchange, Exchange secondExchange) {
+                if (firstExchange == null) {
+                    return secondExchange;
+                }
+                String firstBody = firstExchange.getMessage().getBody(String.class);
+                String secondBody = secondExchange.getMessage().getBody(String.class);
+                String newBody = String.format("%s, %s", firstBody, secondBody);
+                secondExchange.getMessage().setBody(newBody);
+                return secondExchange;
             }
 
             private Exchange contentAsBody(Exchange originalExchange, Exchange enrichmentExchange) {
