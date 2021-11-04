@@ -17,4 +17,14 @@ public class Helper {
             return "error, see logs";
         }
     }
+
+    public static Map<Object, Object> toMap(String jsonString) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(jsonString, Map.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return Map.of();
+        }
+    }
 }

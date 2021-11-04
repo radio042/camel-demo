@@ -1,6 +1,5 @@
 package org.acme.marketing;
 
-import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.AdviceWith;
@@ -9,13 +8,14 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.acme.marketing.Helper.toJson;
+import static org.acme.marketing.Helper.toMap;
 
 public class Test3 extends CamelTestSupport {
 
@@ -55,6 +55,27 @@ public class Test3 extends CamelTestSupport {
         template.sendBody("direct:in", "{\"message\": \"Party at my place this Saturday\", \"bringFriends\": true, \"bringSnacks\": true}");
     }
 
+    @Test
+    public void test3() {
+        System.out.println(craftToMap(new String[] {}));
+        System.out.println(craftToMap(new String[] {"a"}));
+        System.out.println(craftToMap(new String[] {"a", "b"}));
+        System.out.println(craftToMap(new String[] {"a", "b", "c"}));
+        System.out.println(craftToMap(new String[] {"a", "b", "c", "d"}));
+        System.out.println(craftToMap(new String[] {"a", "b", "c", "d", "e"}));
+        System.out.println(craftToMap(new String[] {"a", "b", "c", "d", "e", "f"}));
+    }
+
+    private Map<Integer, String> craftToMap(String[] snacks) {
+        return IntStream.range(0, snacks.length)
+                .mapToObj(i -> new AbstractMap.SimpleEntry<>(i, snacks[i]))
+                .collect(Collectors.toMap(
+                        entry -> entry.getKey() % 3,
+                        AbstractMap.SimpleEntry::getValue,
+                        (snack1, snack2) -> String.format("%s, %s", snack1, snack2)
+                ));
+    }
+
     @Override
     protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
@@ -71,7 +92,7 @@ public class Test3 extends CamelTestSupport {
 
                 // split in method, build 3 exchanges - java intensive, todo
                 // process and send sequentially todo
-
+                simpleSolution();
 
             }
 
@@ -129,6 +150,55 @@ public class Test3 extends CamelTestSupport {
                         .to("mock:c");
             }
 
+            private void simpleSolution() {
+                from("direct:in")
+                        .routeId("complicated-route-4")
+                        .filter().jsonpath("$.[?(@.bringFriends == true)]")
+                        .pollEnrich()
+                        .simple("file:deleteme?noop=true&idempotent=false&fileName=snacks.txt")
+                        .aggregationStrategy(this::contentAsHeader2)
+                        .multicast().to("direct:a", "direct:b", "direct:c");
+                from("direct:a")
+                        .process(exchange -> {
+                            String body = exchange.getMessage().getBody(String.class);
+                            Map<?, ?> snacks = exchange.getMessage().getHeader("snacks", Map.class);
+                            String messageToBob = String.format(
+                                    "%s. Please bring %s.",
+                                    toMap(body).get("message"),
+                                    snacks.get(0)
+                            );
+                            exchange.getMessage().setBody(messageToBob);
+                        })
+                        .log("final message a: ${body}")
+                        .to("mock:end");
+                from("direct:b")
+                        .process(exchange -> {
+                            String body = exchange.getMessage().getBody(String.class);
+                            Map<?, ?> snacks = exchange.getMessage().getHeader("snacks", Map.class);
+                            String messageToBob = String.format(
+                                    "%s. Please bring %s.",
+                                    toMap(body).get("message"),
+                                    snacks.get(1)
+                            );
+                            exchange.getMessage().setBody(messageToBob);
+                        })
+                        .log("final message b: ${body}")
+                        .to("mock:end");
+                from("direct:c")
+                        .process(exchange -> {
+                            String body = exchange.getMessage().getBody(String.class);
+                            Map<?, ?> snacks = exchange.getMessage().getHeader("snacks", Map.class);
+                            String messageToBob = String.format(
+                                    "%s. Please bring %s.",
+                                    toMap(body).get("message"),
+                                    snacks.get(2)
+                            );
+                            exchange.getMessage().setBody(messageToBob);
+                        })
+                        .log("final message c: ${body}")
+                        .to("mock:end");
+            }
+
             private Exchange mergeBodies(Exchange firstExchange, Exchange secondExchange) {
                 if (firstExchange == null) {
                     return secondExchange;
@@ -152,9 +222,8 @@ public class Test3 extends CamelTestSupport {
             }
 
             private Exchange contentAsHeader2(Exchange originalExchange, Exchange enrichmentExchange) {
-                String snacks = enrichmentExchange.getMessage().getBody(String.class);
-                String[] split = snacks.split(",");
-                originalExchange.getMessage().setHeader("snacks", split);
+                String[] snacks = enrichmentExchange.getMessage().getBody(String.class).split(",");
+                originalExchange.getMessage().setHeader("snacks", craftToMap(snacks));
                 return originalExchange;
             }
 
