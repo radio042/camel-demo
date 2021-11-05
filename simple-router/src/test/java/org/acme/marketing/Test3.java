@@ -1,7 +1,6 @@
 package org.acme.marketing;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -9,7 +8,6 @@ import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -57,20 +55,20 @@ public class Test3 extends CamelTestSupport {
 
     @Test
     public void test3() {
-        System.out.println(craftToMap(new String[] {}));
-        System.out.println(craftToMap(new String[] {"a"}));
-        System.out.println(craftToMap(new String[] {"a", "b"}));
-        System.out.println(craftToMap(new String[] {"a", "b", "c"}));
-        System.out.println(craftToMap(new String[] {"a", "b", "c", "d"}));
-        System.out.println(craftToMap(new String[] {"a", "b", "c", "d", "e"}));
-        System.out.println(craftToMap(new String[] {"a", "b", "c", "d", "e", "f"}));
+        System.out.println(distributeToNOrders(new String[] {}, 3));
+        System.out.println(distributeToNOrders(new String[] {"a"}, 3));
+        System.out.println(distributeToNOrders(new String[] {"a", "b"}, 3));
+        System.out.println(distributeToNOrders(new String[] {"a", "b", "c"}, 3));
+        System.out.println(distributeToNOrders(new String[] {"a", "b", "c", "d"}, 3));
+        System.out.println(distributeToNOrders(new String[] {"a", "b", "c", "d", "e"}, 3));
+        System.out.println(distributeToNOrders(new String[] {"a", "b", "c", "d", "e", "f"}, 5));
     }
 
-    private Map<Integer, String> craftToMap(String[] snacks) {
-        return IntStream.range(0, snacks.length)
-                .mapToObj(i -> new AbstractMap.SimpleEntry<>(i, snacks[i]))
+    private Map<Integer, String> distributeToNOrders(String[] listOfThings, int n) {
+        return IntStream.range(0, listOfThings.length)
+                .mapToObj(i -> new AbstractMap.SimpleEntry<>(i, listOfThings[i]))
                 .collect(Collectors.toMap(
-                        entry -> entry.getKey() % 3,
+                        entry -> entry.getKey() % n,
                         AbstractMap.SimpleEntry::getValue,
                         (snack1, snack2) -> String.format("%s, %s", snack1, snack2)
                 ));
@@ -156,47 +154,41 @@ public class Test3 extends CamelTestSupport {
                         .filter().jsonpath("$.[?(@.bringFriends == true)]")
                         .pollEnrich()
                         .simple("file:deleteme?noop=true&idempotent=false&fileName=snacks.txt")
-                        .aggregationStrategy(this::contentAsHeader2)
+                        .aggregationStrategy(this::contentAs3OrdersHeader)
                         .multicast().to("direct:a", "direct:b", "direct:c");
                 from("direct:a")
-                        .process(exchange -> {
-                            String body = exchange.getMessage().getBody(String.class);
-                            Map<?, ?> snacks = exchange.getMessage().getHeader("snacks", Map.class);
-                            String messageToBob = String.format(
-                                    "%s. Please bring %s.",
-                                    toMap(body).get("message"),
-                                    snacks.get(0)
-                            );
-                            exchange.getMessage().setBody(messageToBob);
-                        })
+                        .process(exchange -> formMessageToFriends(exchange, 0))
                         .log("final message a: ${body}")
                         .to("mock:end");
                 from("direct:b")
-                        .process(exchange -> {
-                            String body = exchange.getMessage().getBody(String.class);
-                            Map<?, ?> snacks = exchange.getMessage().getHeader("snacks", Map.class);
-                            String messageToBob = String.format(
-                                    "%s. Please bring %s.",
-                                    toMap(body).get("message"),
-                                    snacks.get(1)
-                            );
-                            exchange.getMessage().setBody(messageToBob);
-                        })
+                        .process(exchange -> formMessageToFriends(exchange, 1))
                         .log("final message b: ${body}")
                         .to("mock:end");
                 from("direct:c")
-                        .process(exchange -> {
-                            String body = exchange.getMessage().getBody(String.class);
-                            Map<?, ?> snacks = exchange.getMessage().getHeader("snacks", Map.class);
-                            String messageToBob = String.format(
-                                    "%s. Please bring %s.",
-                                    toMap(body).get("message"),
-                                    snacks.get(2)
-                            );
-                            exchange.getMessage().setBody(messageToBob);
-                        })
+                        .process(exchange -> formMessageToFriends(exchange, 2))
                         .log("final message c: ${body}")
                         .to("mock:end");
+            }
+
+            private Map<Integer, String> distributeToNOrders(String[] listOfThings, int n) {
+                return IntStream.range(0, listOfThings.length)
+                        .mapToObj(i -> new AbstractMap.SimpleEntry<>(i, listOfThings[i]))
+                        .collect(Collectors.toMap(
+                                entry -> entry.getKey() % n,
+                                AbstractMap.SimpleEntry::getValue,
+                                (snack1, snack2) -> String.format("%s, %s", snack1, snack2)
+                        ));
+            }
+
+            private void formMessageToFriends(Exchange exchange, int order) {
+                String body = exchange.getMessage().getBody(String.class);
+                Map<?, ?> orders = exchange.getMessage().getHeader("orders", Map.class);
+                String messageToBob = String.format(
+                        "%s.%s",
+                        toMap(body).get("message"),
+                        orders.get(order) != null ? String.format(" Bring %s.", orders.get(order)) : ""
+                );
+                exchange.getMessage().setBody(messageToBob);
             }
 
             private Exchange mergeBodies(Exchange firstExchange, Exchange secondExchange) {
@@ -215,15 +207,15 @@ public class Test3 extends CamelTestSupport {
                 return enrichmentExchange;
             }
 
-            private Exchange contentAsHeader(Exchange originalExchange, Exchange enrichmentExchange) {
-                String snacks = enrichmentExchange.getMessage().getBody(String.class);
-                originalExchange.getMessage().setHeader("snacks", snacks);
+            private Exchange contentAs3OrdersHeader(Exchange originalExchange, Exchange enrichmentExchange) {
+                String[] snacks = enrichmentExchange.getMessage().getBody(String.class).split(",");
+                originalExchange.getMessage().setHeader("orders", distributeToNOrders(snacks, 3));
                 return originalExchange;
             }
 
-            private Exchange contentAsHeader2(Exchange originalExchange, Exchange enrichmentExchange) {
-                String[] snacks = enrichmentExchange.getMessage().getBody(String.class).split(",");
-                originalExchange.getMessage().setHeader("snacks", craftToMap(snacks));
+            private Exchange contentAsHeader(Exchange originalExchange, Exchange enrichmentExchange) {
+                String snacks = enrichmentExchange.getMessage().getBody(String.class);
+                originalExchange.getMessage().setHeader("snacks", snacks);
                 return originalExchange;
             }
 

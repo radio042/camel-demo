@@ -13,12 +13,12 @@ public class SimpleRoute2 extends RouteBuilder {
 
     @Override
     public void configure() {
-//        from("kafka:in?brokers=localhost:29092")
-//                .routeId("simple-route-2")
-//                .errorHandler(deadLetterChannel("kafka:errors?brokers=localhost:29092"))
-//                .filter(jsonpath("$.[?(@.bringFriends == true)]"))
-//                .process(this::messageToFriends)
-//                .to("kafka:out?brokers=localhost:29092");
+        from("kafka:in?brokers=localhost:29092")
+                .routeId("simple-route-2")
+                .errorHandler(deadLetterChannel("kafka:errors?brokers=localhost:29092"))
+                .filter(jsonpath("$.[?(@.bringFriends == true)]"))
+                .process(this::messageToFriends)
+                .to("kafka:out?brokers=localhost:29092");
     }
 
     private void messageToFriends(Exchange exchange) {

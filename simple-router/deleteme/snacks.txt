@@ -1,1 +1,1 @@
-chips,popcorn,salad,drinks
+chips,popcorn
