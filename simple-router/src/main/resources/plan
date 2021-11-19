@@ -1,0 +1,43 @@
+"Shared inflatable pool"
+
+##################################
+- wir sind nur ein Adapter
+- from Rest to kafka
+- inkl. Fehlerbehandlung
+
+UI -> BE
+Anbieter ID: 123
+Kunde ID: 456
+Objekt: 789
+Zeitraum: 211119-211120
+
+BE -> Kunden Service & Anbieter Service
+Anbieter ID: 123
+Kunde ID: 456
+Objekt: 789
+Zeitraum: 211119-211120
+
+##################################
+- processor, pollEnrich
+
+UI -> BE
+Anbieter ID: 123
+Kunde ID: 456
+Objekt: 789
+Zeitraum: 211119-211120
+
+BE -> Kunden Service
+Kunde ID: 456
+Objekt: Villa in Nürnberg
+Anbieter: Horst Merlin
+Zeitraum: 211119-211120
+
+BE -> Anbieter Service
+Anbieter ID: 123
+Kunde: Zaphod Beeblebrox
+Objekt: 789
+Zeitraum: 211119-211120
+
+BE -> Analytics
+Objekt: Villa in Nürnberg
+Zeitraum: 211119-211120
