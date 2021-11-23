@@ -16,25 +16,25 @@ public class ComplicatedRoute2 extends RouteBuilder {
 
     @Override
     public void configure() {
-        from("kafka:in?brokers=localhost:29092")
-                .routeId("complicated-route-2")
-                .filter().jsonpath("$.[?(@.bringFriends == true)]")
-                .pollEnrich()
-                .simple("file:classes?noop=true&idempotent=false&fileName=snacks.txt")
-                .aggregationStrategy(this::contentAs3OrdersHeader)
-                .multicast().to("direct:bob", "direct:charlie", "direct:dave");
-        from("direct:bob")
-                .process(exchange -> messageToFriendsIncludingOrder(exchange, 0))
-                .log("final message a: ${body}")
-                .to("kafka:bob?brokers=localhost:29092");
-        from("direct:charlie")
-                .process(exchange -> messageToFriendsIncludingOrder(exchange, 1))
-                .log("final message b: ${body}")
-                .to("kafka:charlie?brokers=localhost:29092");
-        from("direct:dave")
-                .process(exchange -> messageToFriendsIncludingOrder(exchange, 2))
-                .log("final message c: ${body}")
-                .to("kafka:dave?brokers=localhost:29092");
+//        from("kafka:in?brokers=localhost:29092")
+//                .routeId("complicated-route-2")
+//                .filter().jsonpath("$.[?(@.bringFriends == true)]")
+//                .pollEnrich()
+//                .simple("file:classes?noop=true&idempotent=false&fileName=snacks.txt")
+//                .aggregationStrategy(this::contentAs3OrdersHeader)
+//                .multicast().to("direct:bob", "direct:charlie", "direct:dave");
+//        from("direct:bob")
+//                .process(exchange -> messageToFriendsIncludingOrder(exchange, 0))
+//                .log("final message a: ${body}")
+//                .to("kafka:bob?brokers=localhost:29092");
+//        from("direct:charlie")
+//                .process(exchange -> messageToFriendsIncludingOrder(exchange, 1))
+//                .log("final message b: ${body}")
+//                .to("kafka:charlie?brokers=localhost:29092");
+//        from("direct:dave")
+//                .process(exchange -> messageToFriendsIncludingOrder(exchange, 2))
+//                .log("final message c: ${body}")
+//                .to("kafka:dave?brokers=localhost:29092");
     }
 
     private Exchange contentAs3OrdersHeader(Exchange originalExchange, Exchange enrichmentExchange) {

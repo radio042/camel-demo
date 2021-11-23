@@ -13,16 +13,16 @@ public class ComplicatedRoute extends RouteBuilder {
 
     @Override
     public void configure() {
-        from("kafka:marketing-topic?brokers=localhost:29092")
-                .routeId("complicated-route")
-                .errorHandler(deadLetterChannel("kafka:error-topic?brokers=localhost:29092"))
-                .filter(jsonpath("$.[?(@.audience == 'marketing channels')]"))
-                .pollEnrich()
-                .simple("file:classes?noop=true&idempotent=false&fileName=image-uri")
-                .aggregationStrategy(this::appendHeaders)
-                .to("kafka:twitter-service?brokers=localhost:29092")
-                .to("kafka:facebook-service?brokers=localhost:29092")
-                .to("kafka:instagram-service?brokers=localhost:29092");
+//        from("kafka:marketing-topic?brokers=localhost:29092")
+//                .routeId("complicated-route")
+//                .errorHandler(deadLetterChannel("kafka:error-topic?brokers=localhost:29092"))
+//                .filter(jsonpath("$.[?(@.audience == 'marketing channels')]"))
+//                .pollEnrich()
+//                .simple("file:classes?noop=true&idempotent=false&fileName=image-uri")
+//                .aggregationStrategy(this::appendHeaders)
+//                .to("kafka:twitter-service?brokers=localhost:29092")
+//                .to("kafka:facebook-service?brokers=localhost:29092")
+//                .to("kafka:instagram-service?brokers=localhost:29092");
     }
 
     private AggregationStrategy appendHeaders() {
