@@ -1,4 +1,4 @@
-package org.acme.marketing;
+package org.sharedpool;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.AdviceWith;
@@ -6,14 +6,12 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
+import org.sharedpool.platform.Helper;
 
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static org.acme.marketing.Helper.toJson;
-import static org.acme.marketing.Helper.toMap;
 
 public class Test3 extends CamelTestSupport {
 
@@ -185,7 +183,7 @@ public class Test3 extends CamelTestSupport {
                 Map<?, ?> orders = exchange.getMessage().getHeader("orders", Map.class);
                 String messageToBob = String.format(
                         "%s.%s",
-                        toMap(body).get("message"),
+                        Helper.toMap(body).get("message"),
                         orders.get(order) != null ? String.format(" Bring %s.", orders.get(order)) : ""
                 );
                 exchange.getMessage().setBody(messageToBob);
@@ -222,7 +220,7 @@ public class Test3 extends CamelTestSupport {
             private void messageToFriends(Exchange exchange) {
                 final var body = exchange.getMessage().getBody(Map.class);
                 final var inputMessage = body.get("message");
-                final var outputMessage = toJson(Map.of("message", inputMessage));
+                final var outputMessage = Helper.toJson(Map.of("message", inputMessage));
                 exchange.getMessage().setBody(outputMessage);
             }
         };

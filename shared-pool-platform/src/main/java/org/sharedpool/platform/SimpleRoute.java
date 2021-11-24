@@ -1,8 +1,8 @@
-package org.acme.marketing;
+package org.sharedpool.platform;
 
 import org.apache.camel.builder.RouteBuilder;
 
-public class SimpleRoute3 extends RouteBuilder {
+public class SimpleRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         errorHandler(deadLetterChannel("kafka:error-topic?brokers=localhost:29092"));

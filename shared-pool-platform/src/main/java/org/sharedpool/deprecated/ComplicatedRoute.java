@@ -1,4 +1,4 @@
-package org.acme.marketing;
+package org.sharedpool.deprecated;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,12 +1,11 @@
-package org.acme.marketing;
+package org.sharedpool.deprecated;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.sharedpool.platform.Helper;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.Map;
-
-import static org.acme.marketing.Helper.toJson;
 
 @ApplicationScoped
 public class SimpleRoute2 extends RouteBuilder {
@@ -24,7 +23,7 @@ public class SimpleRoute2 extends RouteBuilder {
     private void messageToFriends(Exchange exchange) {
         final var body = exchange.getMessage().getBody(Map.class);
         final var inputMessage = body.get("message");
-        final var outputMessage = toJson(Map.of("message", inputMessage));
+        final var outputMessage = Helper.toJson(Map.of("message", inputMessage));
         exchange.getMessage().setBody(outputMessage);
     }
 }

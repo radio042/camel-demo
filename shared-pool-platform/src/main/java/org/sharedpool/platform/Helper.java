@@ -1,4 +1,4 @@
-package org.acme.marketing;
+package org.sharedpool.platform;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +18,7 @@ public class Helper {
         }
     }
 
-    public static Map<Object, Object> toMap(String jsonString) {
+    public static Map<String, ?> toMap(String jsonString) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(jsonString, Map.class);

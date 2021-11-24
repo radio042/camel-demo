@@ -1,15 +1,14 @@
-package org.acme.marketing;
+package org.sharedpool.deprecated;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.sharedpool.platform.Helper;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static org.acme.marketing.Helper.toMap;
 
 @ApplicationScoped
 public class ComplicatedRoute2 extends RouteBuilder {
@@ -58,7 +57,7 @@ public class ComplicatedRoute2 extends RouteBuilder {
         Map<?, ?> orders = exchange.getMessage().getHeader("orders", Map.class);
         String messageToBob = String.format(
                 "%s.%s",
-                toMap(body).get("message"),
+                Helper.toMap(body).get("message"),
                 orders.get(orderNumber) != null ? String.format(" Bring %s.", orders.get(orderNumber)) : ""
         );
         exchange.getMessage().setBody(messageToBob);

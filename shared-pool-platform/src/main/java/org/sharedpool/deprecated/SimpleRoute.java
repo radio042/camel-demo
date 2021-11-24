@@ -1,4 +1,4 @@
-package org.acme.marketing;
+package org.sharedpool.deprecated;
 
 import org.apache.camel.builder.RouteBuilder;
 
