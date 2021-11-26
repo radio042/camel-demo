@@ -12,25 +12,22 @@ public class ComplicatedRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         errorHandler(deadLetterChannel("kafka:error-topic?brokers=localhost:29092"));
-        from("rest:post:booking/{id}")
+
+        from("rest:post:booking2/{id}")
                 .to("json-validator:ui-schema.json")
                 .multicast().to("direct:customer-services", "direct:provider-services", "direct:analytics-services");
 
         from("direct:customer-services")
-                .pollEnrich()
-                .simple("rest:get:{id}/name?host=localhost:8080/providers")
-                .aggregationStrategy(this::appendAsHeader)
+                .pollEnrich().simple("rest:get:{id}/name?host=localhost:8080/providers").aggregationStrategy(this::appendAsHeader)
                 .process(this::messageToCustomerServices)
                 .to("kafka:customer-events?brokers=localhost:29092");
 
         from("direct:provider-services")
-                .pollEnrich()
-                .simple("rest:get:{id}/name?host=localhost:8080/customers")
-                .aggregationStrategy(this::appendAsHeader)
+                .pollEnrich().simple("rest:get:{id}/name?host=localhost:8080/customers").aggregationStrategy(this::appendAsHeader)
                 .process(this::messageToProviderServices)
                 .to("kafka:provider-events?brokers=localhost:29092");
 
-        from("direct:customer-services")
+        from("direct:analytics-services")
                 .process(this::messageToAnalyticsServices)
                 .to("kafka:analytics-events?brokers=localhost:29092");
     }
