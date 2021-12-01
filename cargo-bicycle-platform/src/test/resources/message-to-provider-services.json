@@ -1,7 +1,7 @@
 {
-  "customerId": 6,
+  "customerName": "Zaphod Beeblebrox",
   "providerId": 28,
-  "swimmingPoolId": 496,
+  "bicycleId": 496,
   "fromDate": "2022-03-14",
   "toDate": "2022-03-14"
 }

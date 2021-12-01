@@ -7,7 +7,6 @@ import java.util.Map;
 
 public class Helper {
 
-
     public static String toJson(Map<String, ?> input) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -18,7 +17,7 @@ public class Helper {
         }
     }
 
-    public static Map<String, ?> toMap(String jsonString) {
+    public static Map<String, Object> toMap(String jsonString) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(jsonString, Map.class);
