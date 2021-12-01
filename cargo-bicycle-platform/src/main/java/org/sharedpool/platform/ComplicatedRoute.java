@@ -15,13 +15,17 @@ public class ComplicatedRoute extends RouteBuilder {
 
         from("rest:post:booking/{id}")
                 .to("json-validator:ui-schema.json")
-                .pollEnrich().simple("rest:get:${body.providerId}/name?host=localhost:8080/providers")
+                .pollEnrich()
+                    .simple("rest:get:${body.providerId}/name?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "provider-name")))
-                .pollEnrich().simple("rest:get:${body.providerId}/offer/${body.bicycleId}/description?host=localhost:8080/providers")
+                .pollEnrich()
+                    .simple("rest:get:${body.providerId}/offer/${body.bicycleId}/description?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "bicycle-description")))
-                .pollEnrich().simple("rest:get:${body.customerId}/name?host=localhost:8080/customers")
+                .pollEnrich()
+                    .simple("rest:get:${body.customerId}/name?host=localhost:8080/customers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "customer-name")))
-                .multicast().to("direct:customer-services", "direct:provider-services", "direct:analytics-services");
+                .multicast()
+                    .to("direct:customer-services", "direct:provider-services", "direct:analytics-services");
 
         from("direct:customer-services")
                 .process(this::messageToCustomerServices)
