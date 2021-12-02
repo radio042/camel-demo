@@ -17,14 +17,15 @@ public class ComplicatedRoute extends RouteBuilder {
 
         from("rest:post:booking-v2")
                 .to("json-validator:ui-schema.json")
+                .process(exchange -> exchange.getMessage().setHeaders(toMap(exchange.getMessage().getBody(String.class))))
                 .pollEnrich()
-                    .simple("rest:get:${body.providerId}/name?host=localhost:8080/providers")
+                    .simple("rest:get:${header.providerId}/name?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "provider-name")))
                 .pollEnrich()
-                    .simple("rest:get:${body.providerId}/offer/${body.bicycleId}/description?host=localhost:8080/providers")
+                    .simple("rest:get:${header.providerId}/offer/${header.bicycleId}/description?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "bicycle-description")))
                 .pollEnrich()
-                    .simple("rest:get:${body.customerId}/name?host=localhost:8080/customers")
+                    .simple("rest:get:${header.customerId}/name?host=localhost:8080/customers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "customer-name")))
                 .multicast()
                     .to("direct:customer-services", "direct:provider-services", "direct:analytics-services");
