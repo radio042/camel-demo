@@ -1,13 +1,15 @@
 package org.sharedpool.platform;
 
+import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
 
 public class SimpleRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        errorHandler(deadLetterChannel("kafka:error-topic?brokers=localhost:29092"));
+        onException(ValidationException.class)
+                .to("kafka:error-topic?brokers=localhost:29092");
 
-        from("rest:post:booking/{id}")
+        from("rest:post:booking")
                 .to("json-validator:ui-schema.json")
                 .to("kafka:bookings?brokers=localhost:29092");
     }

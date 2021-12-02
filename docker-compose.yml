@@ -34,4 +34,5 @@ services:
                        kafka-topics --zookeeper zookeeper:2181 --create --topic provider-events --partitions 1 --replication-factor 1 && \
                        kafka-topics --zookeeper zookeeper:2181 --create --topic customer-events --partitions 1 --replication-factor 1 && \
                        kafka-topics --zookeeper zookeeper:2181 --create --topic error-topic --partitions 1 --replication-factor 1 && \
+                       kafka-topics --zookeeper zookeeper:2181 --create --topic bookings --partitions 1 --replication-factor 1 && \
                        sleep infinity'"

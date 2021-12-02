@@ -1,8 +1,8 @@
 {
-  "id":  "sample schema",
-  "$schema":  "http://json-schema-org/draft-04/schema#",
+  "id":  "ui-schema",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type":  "object",
-  "required":  [ "customerId", "providerId", "swimmingPoolId", "fromDate", "toDate" ],
+  "required":  [ "customerId", "providerId", "bicycleId", "fromDate", "toDate" ],
   "properties":  {
     "customerId": {
       "type": "number"
@@ -10,7 +10,7 @@
     "providerId": {
       "type": "number"
     },
-    "swimmingPoolId": {
+    "bicycleId": {
       "type": "number"
     },
     "fromDate": {
