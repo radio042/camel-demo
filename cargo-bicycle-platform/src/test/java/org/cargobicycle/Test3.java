@@ -1,4 +1,4 @@
-package org.sharedpool;
+package org.cargobicycle;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.AdviceWith;
@@ -6,7 +6,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
-import org.sharedpool.platform.Helper;
+import org.cargobicycle.platform.Helper;
 
 import java.util.AbstractMap;
 import java.util.Map;

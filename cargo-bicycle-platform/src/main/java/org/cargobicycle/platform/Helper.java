@@ -1,4 +1,4 @@
-package org.sharedpool.platform;
+package org.cargobicycle.platform;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

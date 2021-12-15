@@ -1,4 +1,4 @@
-package org.sharedpool.providerservices;
+package org.cargobicycle.providerservices;
 
 import org.apache.camel.builder.RouteBuilder;
 

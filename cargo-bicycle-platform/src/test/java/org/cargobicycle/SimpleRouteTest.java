@@ -1,11 +1,11 @@
-package org.sharedpool;
+package org.cargobicycle;
 
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
-import org.sharedpool.deprecated.SimpleRoute;
+import org.cargobicycle.deprecated.SimpleRoute;
 
 public class SimpleRouteTest extends CamelTestSupport {
 

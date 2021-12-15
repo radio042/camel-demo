@@ -1,4 +1,4 @@
-package org.sharedpool.platform;
+package org.cargobicycle.platform;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ValidationException;
@@ -6,8 +6,8 @@ import org.apache.camel.builder.RouteBuilder;
 
 import java.util.Map;
 
-import static org.sharedpool.platform.Helper.toJson;
-import static org.sharedpool.platform.Helper.toMap;
+import static org.cargobicycle.platform.Helper.toJson;
+import static org.cargobicycle.platform.Helper.toMap;
 
 public class ComplicatedRoute extends RouteBuilder {
     @Override
@@ -15,7 +15,7 @@ public class ComplicatedRoute extends RouteBuilder {
         onException(ValidationException.class)
                 .to("kafka:error-topic?brokers=localhost:29092");
 
-        from("rest:post:booking-v2")
+        from("rest:post:booking")
                 .to("json-validator:ui-schema.json")
                 .process(exchange -> exchange.getMessage().setHeaders(toMap(exchange.getMessage().getBody(String.class))))
                 .process(exchange -> exchange.getMessage().removeHeaders("Camel*"))

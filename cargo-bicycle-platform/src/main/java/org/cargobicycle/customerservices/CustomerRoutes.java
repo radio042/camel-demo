@@ -1,4 +1,4 @@
-package org.sharedpool.customerservices;
+package org.cargobicycle.customerservices;
 
 import org.apache.camel.builder.RouteBuilder;
 

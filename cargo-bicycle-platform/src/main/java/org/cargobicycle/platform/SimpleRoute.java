@@ -1,4 +1,4 @@
-package org.sharedpool.platform;
+package org.cargobicycle.platform;
 
 import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
