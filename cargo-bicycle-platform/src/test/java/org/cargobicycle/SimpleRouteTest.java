@@ -5,7 +5,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
-import org.cargobicycle.deprecated.SimpleRoute;
 
 public class SimpleRouteTest extends CamelTestSupport {
 
@@ -109,11 +108,6 @@ public class SimpleRouteTest extends CamelTestSupport {
 
         // then
         assertMockEndpointsSatisfied();
-    }
-
-    @Override
-    protected RouteBuilder createRouteBuilder() {
-        return new SimpleRoute();
     }
 
 }
