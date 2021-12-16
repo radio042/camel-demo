@@ -10,11 +10,13 @@ public class SimpleRoute extends RouteBuilder {
         onException(JsonValidationException.class)
                 .handled(true)
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
-                .to("kafka:error-topic?brokers=localhost:29092");
+                .to("kafka:error-topic?brokers=localhost:29092")
+                .setBody().constant("Invalid json data");
 
         from("rest:post:booking")
                 .id("simple-route")
                 .to("json-validator:ui-schema.json")
-                .to("kafka:bookings?brokers=localhost:29092");
+                .to("kafka:bookings?brokers=localhost:29092")
+                .setBody().constant("OK");
     }
 }
