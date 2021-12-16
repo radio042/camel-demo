@@ -20,8 +20,8 @@ public class SimpleRouteTest extends CamelTestSupport {
             a.replaceFromWith("direct:start");
             a.weaveByToUri("kafka:bookings?brokers=localhost:29092")
                     .replace().to("mock:out");
-            a.interceptSendToEndpoint("kafka:error-topic?brokers=localhost:29092")
-                    .skipSendToOriginalEndpoint().to("mock:error");
+            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
+                    .replace().to("mock:error");
         });
         String validRequestBody = "{\n" +
                 "  \"customerId\": 6,\n" +
@@ -52,8 +52,8 @@ public class SimpleRouteTest extends CamelTestSupport {
             a.replaceFromWith("direct:start");
             a.weaveByToUri("kafka:bookings?brokers=localhost:29092")
                     .replace().to("mock:out");
-            a.interceptSendToEndpoint("kafka:error-topic?brokers=localhost:29092")
-                    .skipSendToOriginalEndpoint().to("mock:error");
+            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
+                    .replace().to("mock:error");
         });
         String invalidRequestBody = "invalid body";
 
