@@ -6,7 +6,11 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class SimpleRouteTest extends CamelTestSupport {
+    private static final String RESOURCES = "src/test/resources";
 
     @Override
     protected RouteBuilder createRouteBuilder() {
@@ -16,21 +20,8 @@ public class SimpleRouteTest extends CamelTestSupport {
     @Test
     public void validRequestsAreForwardedCorrectly() throws Exception {
         // given
-        AdviceWith.adviceWith(context, "simple-route", a -> {
-            a.replaceFromWith("direct:start");
-            a.weaveByToUri("kafka:bookings?brokers=localhost:29092")
-                    .replace().to("mock:out");
-            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
-                    .replace().to("mock:error");
-        });
-        String validRequestBody = "{\n" +
-                "  \"customerId\": 6,\n" +
-                "  \"providerId\": 28,\n" +
-                "  \"bicycleId\": 496,\n" +
-                "  \"fromDate\": \"2022-03-14\",\n" +
-                "  \"toDate\": \"2022-03-14\"\n" +
-                "}";
-
+        overwriteEndpoints();
+        String validRequestBody = Files.readString(Paths.get(RESOURCES, "ui-request.json"));
         MockEndpoint outEndpoint = context.getEndpoint("mock:out", MockEndpoint.class);
         outEndpoint.expectedMessageCount(1);
         outEndpoint.expectedBodiesReceived(validRequestBody);
@@ -48,14 +39,8 @@ public class SimpleRouteTest extends CamelTestSupport {
     @Test
     public void invalidRequestsAreForwardedCorrectly() throws Exception {
         // given
-        AdviceWith.adviceWith(context, "simple-route", a -> {
-            a.replaceFromWith("direct:start");
-            a.weaveByToUri("kafka:bookings?brokers=localhost:29092")
-                    .replace().to("mock:out");
-            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
-                    .replace().to("mock:error");
-        });
-        String invalidRequestBody = "invalid body";
+        overwriteEndpoints();
+        String invalidRequestBody = Files.readString(Paths.get(RESOURCES, "ui-broken-request.json"));
 
         MockEndpoint outEndpoint = context.getEndpoint("mock:out", MockEndpoint.class);
         outEndpoint.expectedMessageCount(0);
@@ -69,6 +54,16 @@ public class SimpleRouteTest extends CamelTestSupport {
 
         // then
         assertMockEndpointsSatisfied();
+    }
+
+    private void overwriteEndpoints() throws Exception {
+        AdviceWith.adviceWith(context, "simple-route", a -> {
+            a.replaceFromWith("direct:start");
+            a.weaveByToUri("kafka:bookings?brokers=localhost:29092")
+                    .replace().to("mock:out");
+            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
+                    .replace().to("mock:error");
+        });
     }
 
 }
