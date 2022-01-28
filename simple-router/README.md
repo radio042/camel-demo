@@ -5,7 +5,7 @@
 - recent Java version
 
 ### start the infrastructure and the service
-- start the containers: `docker compose up -d`
+- start the containers: `docker-compose up -d`
 - start the service: `mvn clean compile quarkus:dev`
 
 ### send a valid request
@@ -17,4 +17,4 @@
 - send requests: `curl -iX POST http://localhost:8080/booking -d @src/test/resources/ui-broken-request.json --header "Content-Type: application/json"`
 
 ### clean up containers
-- `docker compose down`
+- `docker-compose down`
