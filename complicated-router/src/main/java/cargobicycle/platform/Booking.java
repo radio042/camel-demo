@@ -1,23 +1,22 @@
 package cargobicycle.platform;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
-@RequiredArgsConstructor
-@Getter
-@Setter
-@Builder
+@NoArgsConstructor
+@Data
 public class Booking {
-    private final int customerId;
-    private final int customerName;
-    private final int providerId;
-    private final int providerName;
-    private final int bicycleId;
-    private final int bicycleDescription;
-    private final OffsetDateTime fromDate;
-    private final OffsetDateTime toDate;
+    private int customerId;
+    private int customerName;
+    private int providerId;
+    private int providerName;
+    private int bicycleId;
+    private int bicycleDescription;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private OffsetDateTime fromDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private OffsetDateTime toDate;
 }

@@ -1,9 +1,14 @@
 package cargobicycle.platform;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jackson.JacksonDataFormat;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static cargobicycle.platform.Helper.toJson;
@@ -13,16 +18,20 @@ import static cargobicycle.platform.Helper.toMap;
 public class ComplicatedRoute extends RouteBuilder {
     @Override
     public void configure() {
+        JacksonDataFormat bookingDataFormat = new JacksonDataFormat();
+        bookingDataFormat.setUnmarshalType(Booking.class);
+        bookingDataFormat.addModule(new JavaTimeModule());
+
         onException(ValidationException.class)
                 .to("kafka:error-topic?brokers=localhost:9092");
 
         from("rest:post:booking")
                 .id("complicated-route")
-                .process(exchange
-                        -> System.out.println("### " + exchange.getMessage().getBody(String.class)))
                 .to("json-validator:ui-schema.json")
                 .process(exchange -> exchange.getMessage().setHeaders(toMap(exchange.getMessage().getBody(String.class))))
                 .process(exchange -> exchange.getMessage().removeHeaders("Camel*"))
+                .unmarshal(bookingDataFormat)
+                .log(LoggingLevel.INFO, "### ${body.customerId}")
                 .enrich()
                     .simple("rest:get:${header.providerId}/name?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "provider-name")))
