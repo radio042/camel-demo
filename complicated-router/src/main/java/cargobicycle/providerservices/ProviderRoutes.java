@@ -8,7 +8,7 @@ public class ProviderRoutes extends RouteBuilder {
         from("rest:get:providers/{providerId}/name")
                 .transform().constant("Horst Merlin");
 
-        from("rest:get:providers/{providerId}/offer/{offerId}")
+        from("rest:get:providers/{providerId}/offer/{offerId}/description")
                 .transform().constant("Cargo Bike 3000");
     }
 }

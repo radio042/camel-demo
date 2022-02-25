@@ -14,10 +14,12 @@ public class ComplicatedRoute extends RouteBuilder {
     @Override
     public void configure() {
         onException(ValidationException.class)
-                .to("kafka:error-topic?brokers=localhost:29092");
+                .to("kafka:error-topic?brokers=localhost:9092");
 
         from("rest:post:booking")
                 .id("complicated-route")
+                .process(exchange
+                        -> System.out.println("### " + exchange.getMessage().getBody(String.class)))
                 .to("json-validator:ui-schema.json")
                 .process(exchange -> exchange.getMessage().setHeaders(toMap(exchange.getMessage().getBody(String.class))))
                 .process(exchange -> exchange.getMessage().removeHeaders("Camel*"))
@@ -36,17 +38,17 @@ public class ComplicatedRoute extends RouteBuilder {
         from("direct:customer-services")
                 .id("customer-route")
                 .process(this::messageToCustomerServices)
-                .to("kafka:customer-events?brokers=localhost:29092");
+                .to("kafka:customer-events?brokers=localhost:9092");
 
         from("direct:provider-services")
                 .id("provider-route")
                 .process(this::messageToProviderServices)
-                .to("kafka:provider-events?brokers=localhost:29092");
+                .to("kafka:provider-events?brokers=localhost:9092");
 
         from("direct:analytics-services")
                 .id("analytics-route")
                 .process(this::messageToAnalyticsServices)
-                .to("kafka:analytics-events?brokers=localhost:29092");
+                .to("kafka:analytics-events?brokers=localhost:9092");
     }
 
     private void messageToAnalyticsServices(Exchange exchange) {
