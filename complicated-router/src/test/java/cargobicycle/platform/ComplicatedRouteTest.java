@@ -35,6 +35,10 @@ class ComplicatedRouteTest extends CamelTestSupport {
     }
 
     private void overwriteEndpoints() throws Exception {
+        AdviceWith.adviceWith(context, "error-route", a -> {
+            a.weaveByToUri("kafka:error-topic?brokers=localhost:9092")
+                    .replace().to("mock:error");
+        });
         AdviceWith.adviceWith(context, "complicated-route", a -> {
             a.replaceFromWith("direct:start");
             a.weaveById("enrich1")
@@ -43,19 +47,17 @@ class ComplicatedRouteTest extends CamelTestSupport {
                     .replace().process(exchange -> exchange.getMessage().setHeader("bicycle-description", "Cargo Bike 3000"));
             a.weaveById("enrich3")
                     .replace().process(exchange -> exchange.getMessage().setHeader("customer-name", "Zaphod Beeblebrox"));
-            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
-                    .replace().to("mock:error");
         });
         AdviceWith.adviceWith(context, "customer-route", a -> {
-            a.weaveByToUri("kafka:customer-events?brokers=localhost:29092")
+            a.weaveByToUri("kafka:customer-events?brokers=localhost:9092")
                     .replace().to("mock:customer-events");
         });
         AdviceWith.adviceWith(context, "provider-route", a -> {
-            a.weaveByToUri("kafka:provider-events?brokers=localhost:29092")
+            a.weaveByToUri("kafka:provider-events?brokers=localhost:9092")
                     .replace().to("mock:provider-events");
         });
         AdviceWith.adviceWith(context, "analytics-route", a -> {
-            a.weaveByToUri("kafka:analytics-events?brokers=localhost:29092")
+            a.weaveByToUri("kafka:analytics-events?brokers=localhost:9092")
                     .replace().to("mock:analytics-events");
 
         });

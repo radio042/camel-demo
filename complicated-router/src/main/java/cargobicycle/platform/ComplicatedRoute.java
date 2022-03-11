@@ -1,18 +1,13 @@
 package cargobicycle.platform;
 
+import cargobicycle.platform.entities.Booking;
+import cargobicycle.platform.entities.BookingForAnalytics;
+import cargobicycle.platform.entities.BookingForCustomers;
+import cargobicycle.platform.entities.BookingForProviders;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
-import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
-
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
-
-import static cargobicycle.platform.Helper.toJson;
-import static cargobicycle.platform.Helper.toMap;
 
 
 public class ComplicatedRoute extends RouteBuilder {
@@ -22,16 +17,12 @@ public class ComplicatedRoute extends RouteBuilder {
         bookingDataFormat.setUnmarshalType(Booking.class);
         bookingDataFormat.addModule(new JavaTimeModule());
 
-        onException(ValidationException.class)
-                .to("kafka:error-topic?brokers=localhost:9092");
+        errorHandler(deadLetterChannel("seda:errors"));
 
         from("rest:post:booking")
                 .id("complicated-route")
                 .to("json-validator:ui-schema.json")
-                .process(exchange -> exchange.getMessage().setHeaders(toMap(exchange.getMessage().getBody(String.class))))
-                .process(exchange -> exchange.getMessage().removeHeaders("Camel*"))
                 .unmarshal(bookingDataFormat)
-                .log(LoggingLevel.INFO, "### ${body.customerId}")
                 .enrich()
                     .simple("rest:get:${header.providerId}/name?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "provider-name")))
@@ -46,50 +37,62 @@ public class ComplicatedRoute extends RouteBuilder {
 
         from("direct:customer-services")
                 .id("customer-route")
-                .process(this::messageToCustomerServices)
+                .process(this::toBookingForCustomers)
+                .unmarshal().json(BookingForCustomers.class)
                 .to("kafka:customer-events?brokers=localhost:9092");
 
         from("direct:provider-services")
                 .id("provider-route")
-                .process(this::messageToProviderServices)
+                .process(this::toBookingForProviders)
+                .unmarshal().json(BookingForProviders.class)
                 .to("kafka:provider-events?brokers=localhost:9092");
 
         from("direct:analytics-services")
                 .id("analytics-route")
-                .process(this::messageToAnalyticsServices)
+                .process(this::toBookingForAnalytics)
+                .unmarshal().json(BookingForAnalytics.class)
                 .to("kafka:analytics-events?brokers=localhost:9092");
+
+        from("seda:errors")
+                .id("error-route")
+                .to("kafka:error-topic?brokers=localhost:9092");
     }
 
-    private void messageToAnalyticsServices(Exchange exchange) {
-        Map<String, Object> booking = toMap(exchange.getMessage().getBody(String.class));
-        booking.remove("providerId");
-        booking.put("providerName", exchange.getMessage().getHeader("provider-name"));
-        booking.remove("bicycleId");
-        booking.put("bicycleDescription", exchange.getMessage().getHeader("bicycle-description"));
-        booking.remove("customerId");
-        booking.put("customerName", exchange.getMessage().getHeader("customer-name"));
-        exchange.getMessage().setBody(toJson(booking));
+    private void toBookingForAnalytics(Exchange exchange) {
+        final Booking booking = exchange.getMessage().getBody(Booking.class);
+        final BookingForAnalytics bookingForAnalytics = BookingForAnalytics.builder()
+                .customerName(exchange.getMessage().getHeader("customer-name", String.class))
+                .bicycleDescription(exchange.getMessage().getHeader("bicycle-description", String.class))
+                .providerName(exchange.getMessage().getHeader("provider-name", String.class))
+                .fromDate(booking.getFromDate())
+                .toDate(booking.getToDate()).build();
+        exchange.getMessage().setBody(bookingForAnalytics);
     }
 
-    private void messageToProviderServices(Exchange exchange) {
-        Map<String, Object> booking = toMap(exchange.getMessage().getBody(String.class));
-        booking.remove("customerId");
-        booking.put("customerName", exchange.getMessage().getHeader("customer-name"));
-        exchange.getMessage().setBody(toJson(booking));
+    private void toBookingForProviders(Exchange exchange) {
+        final Booking booking = exchange.getMessage().getBody(Booking.class);
+        final BookingForProviders bookingForProviders = BookingForProviders.builder()
+                .customerName(exchange.getMessage().getHeader("customer-name", String.class))
+                .providerId(booking.getProviderId())
+                .bicycleId(booking.getBicycleId())
+                .fromDate(booking.getFromDate())
+                .toDate(booking.getToDate()).build();
+        exchange.getMessage().setBody(bookingForProviders);
     }
 
-    private void messageToCustomerServices(Exchange exchange) {
-        Map<String, Object> booking = toMap(exchange.getMessage().getBody(String.class));
-        booking.remove("providerId");
-        booking.put("providerName", exchange.getMessage().getHeader("provider-name"));
-        booking.remove("bicycleId");
-        booking.put("bicycleDescription", exchange.getMessage().getHeader("bicycle-description"));
-        exchange.getMessage().setBody(toJson(booking));
+    private void toBookingForCustomers(Exchange exchange) {
+        final Booking booking = exchange.getMessage().getBody(Booking.class);
+        final BookingForCustomers bookingForCustomers = BookingForCustomers.builder()
+                .customerId(booking.getCustomerId())
+                .bicycleDescription(exchange.getMessage().getHeader("bicycle-description", String.class))
+                .providerName(exchange.getMessage().getHeader("provider-name", String.class))
+                .fromDate(booking.getFromDate())
+                .toDate(booking.getToDate()).build();
+        exchange.getMessage().setBody(bookingForCustomers);
     }
 
     private Exchange appendAsHeader(Exchange originalExchange, Exchange enrichmentExchange, String headerKey) {
         originalExchange.getMessage().setHeader(headerKey, enrichmentExchange.getMessage().getBody(String.class));
         return originalExchange;
     }
-
 }
