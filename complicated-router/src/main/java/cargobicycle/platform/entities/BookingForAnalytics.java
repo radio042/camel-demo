@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,7 +17,7 @@ public class BookingForAnalytics {
     private String providerName;
     private String bicycleDescription;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private OffsetDateTime fromDate;
+    private Date fromDate;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private OffsetDateTime toDate;
+    private Date toDate;
 }

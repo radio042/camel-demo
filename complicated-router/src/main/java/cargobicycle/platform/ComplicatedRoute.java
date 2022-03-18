@@ -38,19 +38,19 @@ public class ComplicatedRoute extends RouteBuilder {
         from("direct:customer-services")
                 .id("customer-route")
                 .process(this::toBookingForCustomers)
-                .unmarshal().json(BookingForCustomers.class)
+                .marshal().json(BookingForCustomers.class)
                 .to("kafka:customer-events?brokers=localhost:9092");
 
         from("direct:provider-services")
                 .id("provider-route")
                 .process(this::toBookingForProviders)
-                .unmarshal().json(BookingForProviders.class)
+                .marshal().json(BookingForProviders.class)
                 .to("kafka:provider-events?brokers=localhost:9092");
 
         from("direct:analytics-services")
                 .id("analytics-route")
                 .process(this::toBookingForAnalytics)
-                .unmarshal().json(BookingForAnalytics.class)
+                .marshal().json(BookingForAnalytics.class)
                 .to("kafka:analytics-events?brokers=localhost:9092");
 
         from("seda:errors")

@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +15,7 @@ public class Booking {
     private int providerId;
     private int bicycleId;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private OffsetDateTime fromDate;
+    private Date fromDate;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private OffsetDateTime toDate;
+    private Date toDate;
 }
