@@ -2,6 +2,7 @@ package cargobicycle.platform;
 
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -22,13 +23,43 @@ class ComplicatedRouteTest extends CamelTestSupport {
         overwriteEndpoints();
         String validRequestBody = Files.readString(Paths.get(RESOURCES, "ui-request.json"));
 
-        getMockEndpoint("mock:customer-events").expectedMessageCount(1);
-        getMockEndpoint("mock:provider-events").expectedMessageCount(1);
-        getMockEndpoint("mock:analytics-events").expectedMessageCount(1);
+        MockEndpoint customerEventsMockEndpoint = getMockEndpoint("mock:customer-events");
+        customerEventsMockEndpoint.expectedMessageCount(1);
+        customerEventsMockEndpoint.expectedBodiesReceived(Files.readString(Paths.get(RESOURCES, "message-to-customer-services.json")));
+
+        MockEndpoint providerEventsMockEndpoint = getMockEndpoint("mock:provider-events");
+        providerEventsMockEndpoint.expectedMessageCount(1);
+        providerEventsMockEndpoint.expectedBodiesReceived(Files.readString(Paths.get(RESOURCES, "message-to-provider-services.json")));
+
+        MockEndpoint analyticsEventsMockEndpoint = getMockEndpoint("mock:analytics-events");
+        analyticsEventsMockEndpoint.expectedMessageCount(1);
+        analyticsEventsMockEndpoint.expectedBodiesReceived(Files.readString(Paths.get(RESOURCES, "message-to-analytics-services.json")));
+
         getMockEndpoint("mock:error").expectedMessageCount(0);
 
         // when
         template.sendBody("direct:start", validRequestBody);
+
+        // then
+        assertMockEndpointsSatisfied();
+    }
+
+    @Test
+    public void invalidRequestsAreForwardedCorrectly() throws Exception {
+        // given
+        overwriteEndpoints();
+        String invalidRequestBody = Files.readString(Paths.get(RESOURCES, "ui-broken-request.json"));
+
+        getMockEndpoint("mock:customer-events").expectedMessageCount(0);
+        getMockEndpoint("mock:provider-events").expectedMessageCount(0);
+        getMockEndpoint("mock:analytics-events").expectedMessageCount(0);
+
+        MockEndpoint errorMockEndpoint = getMockEndpoint("mock:error");
+        errorMockEndpoint.expectedMessageCount(1);
+        errorMockEndpoint.expectedBodiesReceived(Paths.get(RESOURCES, "ui-broken-request.json"));
+
+        // when
+        template.sendBody("direct:start", invalidRequestBody);
 
         // then
         assertMockEndpointsSatisfied();
