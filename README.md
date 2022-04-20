@@ -1,3 +1,3 @@
 # camel-demo
 
-Demo Camel projects with useful snippets.
+Demo Camel projects with useful snippets
