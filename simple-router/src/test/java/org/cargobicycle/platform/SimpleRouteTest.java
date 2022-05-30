@@ -59,9 +59,9 @@ public class SimpleRouteTest extends CamelTestSupport {
     private void overwriteEndpoints() throws Exception {
         AdviceWith.adviceWith(context, "simple-route", a -> {
             a.replaceFromWith("direct:start");
-            a.weaveByToUri("kafka:bookings?brokers=localhost:29092")
+            a.weaveByToUri("kafka:bookings?brokers=localhost:9092")
                     .replace().to("mock:out");
-            a.weaveByToUri("kafka:error-topic?brokers=localhost:29092")
+            a.weaveByToUri("kafka:error-topic?brokers=localhost:9092")
                     .replace().to("mock:error");
         });
     }
