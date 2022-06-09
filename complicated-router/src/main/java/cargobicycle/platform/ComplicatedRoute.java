@@ -26,12 +26,15 @@ public class ComplicatedRoute extends RouteBuilder {
                 .enrich()
                     .simple("rest:get:${header.providerId}/name?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "provider-name")))
+                    .id("enrich1")
                 .enrich()
                     .simple("rest:get:${header.providerId}/offer/${header.bicycleId}/description?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "bicycle-description")))
+                    .id("enrich2")
                 .enrich()
                     .simple("rest:get:${header.customerId}/name?host=localhost:8080/customers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "customer-name")))
+                .id("enrich3")
                 .multicast()
                     .to("direct:customer-services", "direct:provider-services", "direct:analytics-services");
 

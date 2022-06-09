@@ -56,7 +56,7 @@ class ComplicatedRouteTest extends CamelTestSupport {
 
         MockEndpoint errorMockEndpoint = getMockEndpoint("mock:error");
         errorMockEndpoint.expectedMessageCount(1);
-        errorMockEndpoint.expectedBodiesReceived(Paths.get(RESOURCES, "ui-broken-request.json"));
+        errorMockEndpoint.expectedBodiesReceived(Files.readString(Paths.get(RESOURCES, "ui-broken-request.json")));
 
         // when
         template.sendBody("direct:start", invalidRequestBody);
