@@ -8,7 +8,6 @@
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
     <modules>
-        <module>cargo-bicycle-platform</module>
         <module>simple-router</module>
         <module>complicated-router</module>
     </modules>
