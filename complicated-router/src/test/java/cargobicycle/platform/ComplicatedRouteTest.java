@@ -72,11 +72,11 @@ class ComplicatedRouteTest extends CamelTestSupport {
         });
         AdviceWith.adviceWith(context, "complicated-route", a -> {
             a.replaceFromWith("direct:start");
-            a.weaveById("enrich1")
+            a.weaveById("enrich-provider-name")
                     .replace().process(exchange -> exchange.getMessage().setHeader("provider-name", "Horst Merlin"));
-            a.weaveById("enrich2")
+            a.weaveById("enrich-bicycle-description")
                     .replace().process(exchange -> exchange.getMessage().setHeader("bicycle-description", "Cargo Bike 3000"));
-            a.weaveById("enrich3")
+            a.weaveById("enrich-customer-name")
                     .replace().process(exchange -> exchange.getMessage().setHeader("customer-name", "Zaphod Beeblebrox"));
         });
         AdviceWith.adviceWith(context, "customer-route", a -> {

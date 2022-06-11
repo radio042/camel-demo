@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
+import org.apache.camel.component.jsonvalidator.JsonValidationException;
 
 
 public class ComplicatedRoute extends RouteBuilder {
@@ -17,7 +18,11 @@ public class ComplicatedRoute extends RouteBuilder {
         bookingDataFormat.setUnmarshalType(Booking.class);
         bookingDataFormat.addModule(new JavaTimeModule());
 
-        errorHandler(deadLetterChannel("seda:errors"));
+        onException(JsonValidationException.class)
+                .handled(true)
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
+                .to("seda:errors")
+                .setBody().constant("Invalid json data");
 
         from("rest:post:booking")
                 .id("complicated-route")
@@ -26,15 +31,15 @@ public class ComplicatedRoute extends RouteBuilder {
                 .enrich()
                     .simple("rest:get:${header.providerId}/name?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "provider-name")))
-                    .id("enrich1")
+                    .id("enrich-provider-name")
                 .enrich()
                     .simple("rest:get:${header.providerId}/offer/${header.bicycleId}/description?host=localhost:8080/providers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "bicycle-description")))
-                    .id("enrich2")
+                    .id("enrich-bicycle-description")
                 .enrich()
                     .simple("rest:get:${header.customerId}/name?host=localhost:8080/customers")
                     .aggregationStrategy(((oldExchange, newExchange) -> appendAsHeader(oldExchange, newExchange, "customer-name")))
-                .id("enrich3")
+                    .id("enrich-customer-name")
                 .multicast()
                     .to("direct:customer-services", "direct:provider-services", "direct:analytics-services");
 
