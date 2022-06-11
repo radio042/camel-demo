@@ -11,7 +11,7 @@ public class SimpleRoute extends RouteBuilder {
                 .handled(true)
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
                 .to("kafka:error-topic?brokers=localhost:9092")
-                .setBody().constant("Invalid json data");
+                .setBody().constant("Invalid request");
 
         from("rest:post:booking")
                 .id("simple-route")

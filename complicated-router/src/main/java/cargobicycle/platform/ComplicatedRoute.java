@@ -22,7 +22,13 @@ public class ComplicatedRoute extends RouteBuilder {
                 .handled(true)
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
                 .to("seda:errors")
-                .setBody().constant("Invalid json data");
+                .setBody().constant("Invalid request");
+
+        onException(JsonValidationException.class)
+                .handled(true)
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
+                .to("seda:errors")
+                .setBody().constant("Server error");
 
         from("rest:post:booking")
                 .id("complicated-route")
