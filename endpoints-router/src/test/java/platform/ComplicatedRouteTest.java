@@ -1,16 +1,17 @@
 package platform;
 
 import cargobicycle.platform.ComplicatedRoute;
+import io.quarkus.test.junit.QuarkusTest;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-@Disabled("todo: use properties")
+
+@QuarkusTest
 class ComplicatedRouteTest extends CamelTestSupport {
     private static final String RESOURCES = "src/test/resources";
 
@@ -82,15 +83,15 @@ class ComplicatedRouteTest extends CamelTestSupport {
                     .replace().process(exchange -> exchange.getMessage().setHeader("customer-name", "Zaphod Beeblebrox"));
         });
         AdviceWith.adviceWith(context, "customer-route", a -> {
-            a.weaveByToUri("kafka:customer-events?brokers=localhost:9092")
+            a.weaveByToUri("kafka://customer-events?brokers=localhost%3A9092")
                     .replace().to("mock:customer-events");
         });
         AdviceWith.adviceWith(context, "provider-route", a -> {
-            a.weaveByToUri("kafka:provider-events?brokers=localhost:9092")
+            a.weaveByToUri("kafka://provider-events?brokers=localhost%3A9092")
                     .replace().to("mock:provider-events");
         });
         AdviceWith.adviceWith(context, "analytics-route", a -> {
-            a.weaveByToUri("kafka:analytics-events?brokers=localhost:9092")
+            a.weaveByToUri("localkafka:analytics-events")
                     .replace().to("mock:analytics-events");
 
         });
